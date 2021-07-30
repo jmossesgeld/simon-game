@@ -3,12 +3,18 @@ $(document).on("keypress", startGame);
 var buttons = $(".btn");
 var level = 1;
 var sequence = [];
-var colors = ["green", "red", "yellow", "blue"];
 var picks = 0;
+var onGame = false;
 
 function startGame() {
-  buttons.click(onButtonClick);
-  addToSequence();
+  if (onGame == false) {
+    picks = 0;
+    level = 1;
+    sequence = [];
+    onGame = true;
+    buttons.click(onButtonClick);
+    addToSequence();
+  }
 }
 
 function addToSequence() {
@@ -32,6 +38,8 @@ function addToSequence() {
 }
 
 function addAnimation(button) {
+  var audio = new Audio(`sounds/${button.getAttribute("id")}.mp3`);
+  audio.play();
   button.classList.add("pressed");
   setTimeout(() => {
     button.classList.remove("pressed");
@@ -39,20 +47,25 @@ function addAnimation(button) {
 }
 
 function onButtonClick(e) {
-  addAnimation(this);
-  index = buttons.index(this); //find index of button clicked
-  if (sequence[picks] == index) {
-    //check if the button clicked with the correct sequence
-    if (sequence.length - picks == 1) {
-      //check if last sequence
-      picks = 0;
-      addToSequence();
+  if (onGame) {
+    addAnimation(this);
+    index = buttons.index(this); //find index of button clicked
+    if (sequence[picks] == index) {
+      //check if the button clicked with the correct sequence
+      if (sequence.length - picks == 1) {
+        //check if last sequence
+        picks = 0;
+        addToSequence();
+      } else {
+        picks++;
+      }
     } else {
-      picks++;
+      //game over
+      var audio = new Audio("sounds/wrong.mp3");
+      audio.play();
+      $("h1").text("GAME OVER!");
+      $("body").addClass("game-over");
+      onGame = false;
     }
-  } else {
-    //game over
-    $("h1").text("GAME OVER!");
-    $("body").addClass("game-over");
   }
 }
